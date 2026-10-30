@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:study_planner/constants/colors.dart';
+import 'package:study_planner/services/course_service.dart';
 import 'package:study_planner/widgets/custom_button.dart';
 
 class MainPage extends StatelessWidget {
@@ -14,6 +15,7 @@ class MainPage extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -33,6 +35,96 @@ class MainPage extends StatelessWidget {
                       icon: Icons.add,
                     ),
                   ],
+                ),
+                const SizedBox(height: 30),
+                const Text(
+                  'Your study planner helps you to keep track of your study progress and manage your time effectively.',
+                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                ),
+                const SizedBox(height: 20),
+                // StreamBuilder to show list of courses
+                const Text(
+                  'Courses',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Text(
+                  'Your running subjects',
+                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                ),
+                const SizedBox(height: 10),
+                StreamBuilder(
+                  stream: CourseService().loadCourses(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text("Error loading data"));
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            vertical: MediaQuery.of(context).size.height * 0.01,
+                          ),
+                          child: Column(
+                            children: [
+                              Image.asset(
+                                "assets/course.png",
+                                fit: BoxFit.cover,
+                                width: 200,
+                              ),
+                              const SizedBox(height: 10),
+                              const Text(
+                                'No courses available.Feel free to add a course!',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    } else {
+                      final courses = snapshot.data!;
+                      return ListView.builder(
+                        itemCount: courses.length,
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          final course = courses[index];
+                          return Card(
+                            elevation: 0,
+                            color: lightGreen,
+                            margin: EdgeInsets.symmetric(vertical: 8),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 3),
+                              child: ListTile(
+                                title: Text(
+                                  course.name,
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  course.description,
+                                  style: const TextStyle(
+                                    color: Colors.black87,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    }
+                  },
                 ),
               ],
             ),

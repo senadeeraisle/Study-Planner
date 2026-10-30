@@ -26,4 +26,14 @@ class CourseService {
       }
     }
   }
+
+  //method to load courses using stream
+
+  Stream<List<Course>> loadCourses() {
+    return _courseCollection.snapshots().map((snapshot) {
+      return snapshot.docs
+          .map((doc) => Course.fromJson(doc.data() as Map<String, dynamic>))
+          .toList();
+    });
+  }
 }
